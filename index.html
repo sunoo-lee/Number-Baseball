@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Number Baseball</title>
+
+    <style>
+      html {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+      }
+      h2 {
+        color: rgb(162, 197, 233);
+        text-align: center;
+      }
+      .text {
+        margin: 0px auto;
+        text-align: center;
+      }
+      .container {
+        padding: 20px;
+        height: 400px;
+        background-color: white;
+        border: rgb(17, 115, 212) solid 4px;
+        border-radius: 10px;
+      }
+      #form {
+        margin-top: 15px;
+      }
+      input {
+        width: 150px;
+        height: 25px;
+        font-size: 1.2rem;
+      }
+      .btn_check {
+        /* font-size: 1.2rem; */
+        color: white;
+        width: 80px;
+        height: 30px;
+        margin-left: 5px;
+        font-size: 1.1rem;
+        background-color: dodgerblue;
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        border: none;
+      }
+      .btn_re {
+        display: none;
+        width: 100px;
+        height: 30px;
+        margin: auto;
+        margin-top: 20px;
+        font-size: 1.2rem;
+        color: white;
+        background-color: dodgerblue;
+        justify-content: center;
+        align-items: center;
+        border-radius: 16px;
+        border: none;
+      }
+      button:hover {
+        background-color: rgb(91, 173, 255);
+      }
+      button:active {
+        background-color: rgb(0, 81, 161);
+      }
+      #logs {
+        margin-top: 10px;
+        font-size: 1.2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h2>02.05.2022</h2>
+      <div class="container">
+        <h3 class="text">4자리 숫자를 입력하세요.</h3>
+        <hr />
+        <form id="form">
+          <input type="text" id="input" />
+          <button class="btn_check">Check</button>
+        </form>
+        <div id="logs"></div>
+        <button class="btn_re">Restart</button>
+      </div>
+    </div>
+
+    <script>
+      const $input = document.querySelector("#input");
+      const $form = document.querySelector("#form");
+      const $logs = document.querySelector("#logs");
+      const $reBtn = document.querySelector(".btn_re");
+      const $text = document.querySelector(".text");
+
+      function restartPage() {
+        location.replace(location.href);
+      }
+
+      $reBtn.addEventListener("click", restartPage);
+
+      const numbers = [];
+      for (let n = 0; n < 9; n += 1) {
+        numbers.push(n + 1);
+      }
+
+      const answer = [];
+      for (let n = 0; n < 4; n += 1) {
+        const index = Math.floor(Math.random() * numbers.length);
+        answer.push(numbers[index]);
+        numbers.splice(index, 1);
+      }
+      console.log(answer);
+
+      const tries = [];
+      function checkInput(input) {
+        if (input.length !== 4) {
+          $text.textContent = "4자리 숫자를 입력해주세요.";
+          return;
+        }
+        if (new Set(input).size !== 4) {
+          $text.textContent = "중복되지 않게 입력해주세요.";
+          return;
+        }
+        if (tries.includes(input)) {
+          $text.textContent = "이미 시도한 값입니다.";
+          return;
+        }
+        $text.textContent = "4자리 숫자를 입력해주세요.";
+        return true;
+      }
+
+      function defeated() {
+        const message = document.createTextNode(`Fail ${answer.join("")}`);
+        restart();
+        $logs.appendChild(message);
+      }
+
+      function restart() {
+        $reBtn.style.display = "flex";
+      }
+
+      let out = 0;
+      $form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const value = $input.value;
+        $input.value = "";
+        if (!checkInput(value)) {
+          return;
+        }
+        if (answer.join("") === value) {
+          const message = document.createTextNode(`Correct ${answer.join("")}`);
+          restart();
+          $logs.appendChild(message);
+          rerturn;
+        }
+        if (tries.length >= 9) {
+          defeated();
+          return;
+        }
+        $input.focus();
+
+        let strike = 0;
+        let ball = 0;
+        for (let i = 0; i < answer.length; i++) {
+          const index = value.indexOf(answer[i]);
+          if (index > -1) {
+            if (index === i) {
+              strike += 1;
+            } else {
+              ball += 1;
+            }
+          }
+        }
+        if (strike === 0 && ball === 0) {
+          out++;
+          $logs.append(`${value}　Out ${out}`, document.createElement("br"));
+        } else {
+          $logs.append(
+            `${value}　S ${strike} B ${ball}`,
+            document.createElement("br")
+          );
+        }
+        if (out === 3) {
+          defeated();
+          return;
+        }
+
+        tries.push(value);
+      });
+    </script>
+  </body>
+</html>
